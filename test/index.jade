@@ -1,0 +1,12 @@
+html
+  head
+    link(rel='stylesheet', href='../build/build.css')
+  body
+    #mocha
+    script(src='../build/build.js')
+    script.
+      require('visionmedia-mocha');
+      mocha.setup('bdd');
+    script(src='sync-model.js')
+    script.
+      mocha.run();
