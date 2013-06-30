@@ -9,9 +9,21 @@
 
     $ component install luka5/sync-model
 
+## Usage
+
+```js
+var syncModel = require('sync-model');
+
+var el
+  , inst;
+el = document.querySelector('#my-form');
+inst = new Model(...);
+syncModel(el, inst);
+```
+
 ## API
 
-### formToModel(form, model)
+### syncModel(form, model)
 Takes the ``form`` dom element and a ``model`` or model instance.
 Returns a ``model`` instance.
 
