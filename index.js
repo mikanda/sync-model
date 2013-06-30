@@ -37,7 +37,7 @@ function updateAttr (key, meta) {
     return;
 
   if (type(meta) === 'array' && meta.length >= 1) {
-    while (query('[name^="' + key + '.' + i + '"]') !== null) {
+    while (query('[name^="' + key + '.' + i + '"]', this.form) !== null) {
       each(meta[0], function (k, v) {
         updateAttr(key + '.' + i + '.' + k, v);
       });
