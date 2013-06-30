@@ -1,0 +1,22 @@
+{
+  "name": "sync-model",
+  "repo": "luka5/sync-model",
+  "description": "Takes a model and updates its values using form fields",
+  "version": "0.0.1",
+  "keywords": [],
+  "dependencies": {
+    "component/object": "0.0.3",
+    "component/each": "0.0.1",
+    "component/value": "1.1.0",
+    "component/query": "0.0.1",
+    "component/type": "1.0.0"
+  },
+  "development": {
+    "component/model": "0.0.1"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": [
+    "index.js"
+  ]
+}
