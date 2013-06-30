@@ -2,11 +2,10 @@
 build: components index.js
 	@component build --dev
 
-test/index.html: test/index.jade
-	@jade test/index.jade
-
-test: test/index.html components build
-	@echo open test/index.html in your browser
+test: components build
+	@test -d build || mkdir build
+	@echo open http://localhost:3000/ in your browser
+	@node test/server.js
 
 components: component.json
 	@component install --dev
