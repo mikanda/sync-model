@@ -3,23 +3,23 @@
  * Module dependencies.
  */
 
-var chai = require('chaijs-chai')
-  , model = require('component-model')
-  , domify = require('component-domify')
-  , syncModel = require('sync-model')
+var chai = require('chaijs-chai'),
+    model = require('component-model'),
+    domify = require('component-domify'),
+    syncModel = require('sync-model'),
   
   // symbol imports
   
-  , should = chai.should();
+    should = chai.should();
 
 /**
  * Tests.
  */
 
 describe('sync-model', function(){
-  var Model
-    , object
-    , el;
+  var Model,
+      object,
+      el;
   before(function(){
     var html;
     html = [
