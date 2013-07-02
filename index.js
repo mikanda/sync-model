@@ -53,10 +53,10 @@ function updateAttr (key, meta) {
     return;
   }
 
-  val = null;
   el = query('[name="'+key+'"]', this.form);
-  if (el)
-    val = value(el);
+  if (!el)
+    return;
+  val = value(el);
 
   key = key.split('.');
   obj = this.model[key[0]]();
