@@ -2,7 +2,7 @@
   "name": "sync-model",
   "repo": "luka5/sync-model",
   "description": "Takes a model and updates its values using form fields",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "keywords": [],
   "dependencies": {
     "component/object": "0.0.3",
