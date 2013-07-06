@@ -9,7 +9,8 @@
     "component/each": "0.0.1",
     "component/value": "1.1.0",
     "component/query": "0.0.1",
-    "component/type": "1.0.0"
+    "component/type": "1.0.0",
+    "matthewp/attr": "*"
   },
   "development": {
     "component/model": "0.0.1",
