@@ -44,17 +44,32 @@ describe('sync-model', function(){
     // initialize model
 
     Model = model('Entity')
-      .attr('simplevalue')
+      .attr('simplevalue', { type: 'string' })
       .attr('objectvalue', {
-        nested: {
-          value: 'string'
+        type: 'object',
+        properties: {
+          nested: {
+            type: 'object',
+            properties: {
+              value: { type: 'string' }
+            }
+          }
         }
       })
-      .attr('arrayvalue', [{
-        nested: {
-          value: 'string'
+      .attr('arrayvalue', {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            nested: {
+              type: 'object',
+              properties: {
+                value: { type: 'string' }
+              }
+            }
+          }
         }
-      }]);
+      });
 
     // use model to instantiate object
 
