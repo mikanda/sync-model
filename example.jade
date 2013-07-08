@@ -6,19 +6,51 @@ html
       function init() {
         var syncModel = require('sync-model');
         var model = require('component-model');
+        var validator = require('Baggz-amanda')('json');
 
         var User = model('user')
-                    .attr('name')
-                    .attr('email')
-                    .attr('address', {
-                      street: 'string',
-                      zipcode: 'string',
-                      city: 'string'
+                    .attr('name', {
+                      required: true,
+                      type: 'string'
                     })
-                    .attr('orders', [{
-                      amount: 'integer',
-                      name: 'string'
-                    }]);
+                    .attr('email', {
+                      required: true,
+                      type: 'string',
+                      format: 'email'
+                    })
+                    .attr('address', {
+                      type: 'object',
+                      properties: {
+                        street: {
+                          required: true,
+                          type: 'string'
+                        },
+                        zipcode: {
+                          required: true,
+                          type: 'string'
+                        },
+                        city: {
+                          required: true,
+                          type: 'string'
+                        }
+                      }
+                    })
+                    .attr('orders', {
+                      type: 'array',
+                      items: {
+                        type: 'object',
+                        properties: {
+                          amount: {
+                            required: true,
+                            type: 'integer'
+                          },
+                          name: {
+                            required: true,
+                            type: 'string'
+                          }
+                        }
+                      }
+                    });
         var user = syncModel(document.querySelector('form'), User);
         console.log(user);
       };

@@ -1,19 +1,51 @@
 <!DOCTYPE html><html><head><script type="text/javascript" src="./build/build.js"></script><script type="text/javascript">function init() {
   var syncModel = require('sync-model');
   var model = require('component-model');
+  var validator = require('Baggz-amanda')('json');
   
   var User = model('user')
-              .attr('name')
-              .attr('email')
-              .attr('address', {
-                street: 'string',
-                zipcode: 'string',
-                city: 'string'
+              .attr('name', {
+                required: true,
+                type: 'string'
               })
-              .attr('orders', [{
-                amount: 'integer',
-                name: 'string'
-              }]);
+              .attr('email', {
+                required: true,
+                type: 'string',
+                format: 'email'
+              })
+              .attr('address', {
+                type: 'object',
+                properties: {
+                  street: {
+                    required: true,
+                    type: 'string'
+                  },
+                  zipcode: {
+                    required: true,
+                    type: 'string'
+                  },
+                  city: {
+                    required: true,
+                    type: 'string'
+                  }
+                }
+              })
+              .attr('orders', {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    amount: {
+                      required: true,
+                      type: 'integer'
+                    },
+                    name: {
+                      required: true,
+                      type: 'string'
+                    }
+                  }
+                }
+              });
   var user = syncModel(document.querySelector('form'), User);
   console.log(user);
 };</script></head><body onload="init()"><form><span>Name: </span><input name="name" value="Hans"><br><span>Email:</span><input name="email" value="h@ns"><br><span>Address:</span><input name="address.street" value="streetname"><input name="address.zipcode" value="zipcode"><input name="address.city" value="city"><br><span>Orders:</span><input name="orders.0.amount" value="1"><input name="orders.0.name" value="Socks"><br><input name="orders.1.amount" value="2"><input name="orders.1.name" value="Shoes"></form></body></html>
