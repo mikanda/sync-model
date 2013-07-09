@@ -11,14 +11,14 @@
     "component/query": "0.0.1",
     "component/type": "1.0.0",
     "visionmedia/batch": "0.4.0",
-    "matthewp/attr": "*"
+    "matthewp/attr": "*",
+    "Baggz/amanda": "v0.4.7"
   },
   "development": {
     "component/model": "0.0.1",
     "component/domify": "1.0.0",
     "visionmedia/mocha": "1.11.0",
-    "chaijs/chai": "1.7.2",
-    "Baggz/amanda": "v0.4.7"
+    "chaijs/chai": "1.7.2"
   },
   "license": "MIT",
   "main": "index.js",
