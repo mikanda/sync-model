@@ -1,8 +1,8 @@
 {
   "name": "sync-model",
-  "repo": "luka5/sync-model",
+  "repo": "mikanda/sync-model",
   "description": "Takes a model and updates its values using form fields",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "keywords": [],
   "dependencies": {
     "component/object": "0.0.3",
