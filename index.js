@@ -9,6 +9,7 @@ var object = require('object'),
     query = require('query'),
     attr = require('attr'),
     type = require('type'),
+    Batch = require('batch'),
     validator = require('amanda')('json');
 
 /**
@@ -17,7 +18,8 @@ var object = require('object'),
 
 module.exports = syncModel;
 
-function syncModel (form, model, opt) {
+function syncModel (form, model, callback, callbackScope, opt) {
+  var batch = new Batch;
   this.form = form;
   if (type(model) === 'function') {
     model = new model();
@@ -30,11 +32,32 @@ function syncModel (form, model, opt) {
 
     if (!opt || opt.validate === true) {
       data = this.model[key]();
-      validator.validate(data, meta, function(error) {
-        if (error)
-          console.log(key + ' validator error: ', error, error.getProperties(), error.getMessages());
+      batch.push(function (done) {
+        validator.validate(data, meta, { singleError: false }, function (err) {
+          var errors = [],
+              i;
+          if (err && err.length)
+            for (i = 0; i < err.length; i++) {
+              if (err[i].property === undefined || err[i].property == '')
+                err[i].property = key;
+              else
+                err[i].property = key + '.' + err[i].property;
+              errors.push(err[i]);
+            }
+          done(null, errors);
+        });
       });
     }
+  });
+  batch.end(function (_, _errors) {
+    var errors = [];
+    each(_errors, function (err, index) {
+      if (err.length > 0)
+        errors = errors.concat(err);
+    });
+    if (errors.length === 0)
+      errors = null;
+    callback.call(callbackScope, errors);
   });
   return model;
 };

@@ -51,7 +51,10 @@ html
                         }
                       }
                     });
-        var user = syncModel(document.querySelector('form'), User);
+        function callback (errors) {
+          console.log('validaton errors: ', errors);
+        }
+        var user = syncModel(document.querySelector('form'), User, callback, this);
         console.log(user);
       };
   body(onload="init()")

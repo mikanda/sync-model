@@ -10,6 +10,7 @@
     "component/value": "1.1.0",
     "component/query": "0.0.1",
     "component/type": "1.0.0",
+    "visionmedia/batch": "0.4.0",
     "matthewp/attr": "*"
   },
   "development": {
