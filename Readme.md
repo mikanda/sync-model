@@ -6,7 +6,7 @@
 
   Install with [component(1)](http://component.io):
 
-    $ component install luka5/sync-model
+    $ component install mikanda/sync-model
 
 ## Usage
 
