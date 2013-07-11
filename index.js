@@ -16,27 +16,32 @@ var object = require('object'),
  * Module exports.
  */
 
-module.exports = syncModel;
+module.exports = function (form, model, callback, callbackScope, opt) {
+  return new SyncModel(form, model, callback, callbackScope, opt);
+};
 
-function syncModel (form, model, callback, callbackScope, opt) {
-  var batch = new Batch;
+function SyncModel (form, model, callback, callbackScope, opt) {
+  var batch = new Batch,
+      self = this;
   this.form = form;
   if (type(model) === 'function') {
     model = new model();
   }
   this.model = model;
   this.attrs = model.model.attrs;
-  each(attrs, function (key, meta) {
+  each(this.attrs, function (key, meta) {
     var data;
-    search(key, meta);
+    self.search(key, meta);
 
     if (!opt || opt.validate === true) {
-      data = this.model[key]();
+      if (!opt.amanda)
+        opt.amanda = {singleError: false};
+      data = self.model[key]();
       batch.push(function (done) {
-        validator.validate(data, meta, { singleError: false }, function (err) {
+        validator.validate(data, meta, opt.amanda, function (err) {
           var errors = [],
               i;
-          if (err && err.length)
+          if (err && err.length) {
             for (i = 0; i < err.length; i++) {
               if (err[i].property === undefined || err[i].property == '')
                 err[i].property = key;
@@ -44,11 +49,13 @@ function syncModel (form, model, callback, callbackScope, opt) {
                 err[i].property = key + '.' + err[i].property;
               errors.push(err[i]);
             }
+          }
           done(null, errors);
         });
       });
     }
   });
+  console.log('batch register end');
   batch.end(function (_, _errors) {
     var errors = [];
     each(_errors, function (err, index) {
@@ -57,12 +64,12 @@ function syncModel (form, model, callback, callbackScope, opt) {
     });
     if (errors.length === 0)
       errors = null;
+console.log('sync model end, apply callback with arguments:', errors);
     callback.call(callbackScope, errors);
   });
   return model;
 };
-
-function search (key, meta) {
+SyncModel.prototype.search = function (key, meta) {
   var val,
       el,
       part,
@@ -72,7 +79,8 @@ function search (key, meta) {
       count = 0,
       tmp = {},
       allElements,
-      index;
+      index,
+      self = this;
 
   if (!meta || type(meta) === 'string' || meta.type === 'boolean' || meta.type === 'integer' || meta.type === 'number' || meta.type === 'string' || meta.type === 'null') {
     el = query('[name="'+key+'"]', this.form);
@@ -81,15 +89,15 @@ function search (key, meta) {
     val = value(el);
     if (meta.type === 'integer' || meta.type === 'number')
       val = val*1;
-    updateValue(key, val);
+    this.updateValue(key, val);
 
   } else if (meta.type === 'object') {
     each(meta.properties, function (k, v) {
-      search(key + '.' + k, v);
+      self.search(key + '.' + k, v);
     });
 
   } else if (meta.type === 'array') {
-    updateValue(key, []);
+    this.updateValue(key, []);
     allElements = query.all('[name^="' + key + '."]', this.form);
     each(allElements, function (el) {
       var name,
@@ -103,7 +111,7 @@ function search (key, meta) {
 
     while (amount > count) {
       if (query('[name^="' + key + '.' + i + '"]', this.form) !== null) {
-        search(key + '.' + i, meta.items);
+        self.search(key + '.' + i, meta.items);
         count++;
       }
       i++;
@@ -119,8 +127,7 @@ function search (key, meta) {
     return;
   }
 };
-
-function updateValue (key, val) {
+SyncModel.prototype.updateValue = function (key, val) {
   var obj,
       part,
       i,
