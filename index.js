@@ -8,7 +8,8 @@ var object = require('object'),
     value = require('value'),
     query = require('query'),
     attr = require('attr'),
-    type = require('type');
+    type = require('type'),
+    bind = require('bind');
 
 /**
  * Module exports.
@@ -16,52 +17,123 @@ var object = require('object'),
 
 module.exports = SyncModel;
 
-function SyncModel (form, model) {
+/**
+ * Boundled handlers to convert types.
+ */
+
+function SyncModel (form, model, handlers) {
   if (!(this instanceof SyncModel))
     return new SyncModel(form, model);
 
   var self = this;
+  this.handlers = {
+    'integer': bind(this, this.toNumber),
+    'number': bind(this, this.toNumber)
+  };
+  object.merge(this.handlers, handlers || {});
   this.form = form;
   this.model = model;
   if (type(model) === 'function')
     this.model = model = new model();
 
   each(model.model.attrs, function (key, meta) {
-    self.search(key, meta);
+    self.sync(key, meta);
   });
   return model;
 };
-SyncModel.prototype.search = function (key, meta) {
-  var val,
-      el,
-      i,
-      self = this;
 
-  if (!meta
-      || type(meta) === 'string'
-      || meta.type.match(/^boolean|integer|number|string|null$/g) !== null) {
-    el = query('[name="'+key+'"]', this.form);
-    if (!el)
-      return;
-    val = value(el);
-    if (meta.type === 'integer' || meta.type === 'number')
-      val = val*1;
-    this.updateValue(key, val);
+/**
+ * Synchronize the model at `key` with the data from the DOM.
+ *
+ * @param {String} key
+ * @param {Object} schema
+ */
 
-  } else if (meta.type === 'object') {
-    each(meta.properties, function (k, v) {
-      self.search(key + '.' + k, v);
-    });
+SyncModel.prototype.sync = function (key, schema) {
 
-  } else if (meta.type === 'array') {
-    this.updateValue(key, []);
-    i = 0;
-    while (query('[name^="' + key + '.' + i + '"]', this.form) !== null) {
-      self.search(key + '.' + i, meta.items);
-      i++;
-    }
+  // dispatch the the handling to the appropriate route
+
+  switch (schema.type) {
+    case 'object': return this.syncObject(key, schema);
+    case 'array': return this.syncArray(key, schema);
+    default: return this.syncValue(key, schema);
   }
 };
+
+/**
+ * Synchronize a single value.
+ *
+ * @param {String} key the key to the value
+ * @param {Object} schema the schema of the affected attr
+ * @param {Object} value
+ */
+
+SyncModel.prototype.syncValue = function(key, schema){
+  var el,
+      val,
+      handler;
+  el = query('[name=' + JSON.stringify(key) + ']', this.form);
+  if (!el) return;
+  val = value(el);
+  if ((handler = this.handlers[schema.type])) {
+    val = handler(val);
+  }
+  this.updateValue(key, val);
+};
+
+/**
+ * Synchronize an object.
+ *
+ * @param {String} key the key to the object
+ * @param {Object} schema the schema of the affected attr
+ */
+
+SyncModel.prototype.syncObject = function(key, schema){
+  var self = this;
+  each(schema.properties, function (k, v) {
+    self.sync(key + '.' + k, v);
+  });
+};
+
+/**
+ * Synchronize an array.
+ *
+ * @param {String} key the key to the array
+ * @param {Object} schema the schema of the affected attr
+ */
+
+SyncModel.prototype.syncArray = function(key, schema){
+  var queryFn;
+
+  // function to generate the next query string
+
+  queryFn = function(i){
+    return '[name^=' + JSON.stringify(key + '.' + i) + ']';
+  };
+
+  // set initial to empty array
+
+  this.updateValue(key, []);
+  for (var i = 0; query(queryFn(i), this.form); ++i) {
+    this.sync(key + '.' + i, schema.items);
+  }
+};
+
+/**
+ * Converts the value to a number.
+ */
+
+SyncModel.prototype.toNumber = function(value){
+  return Number(value);
+};
+
+/**
+ * Update the value at `key`.
+ *
+ * @param {String} key
+ * @param {Object} val
+ */
+
 SyncModel.prototype.updateValue = function (key, val) {
   var obj,
       part,
