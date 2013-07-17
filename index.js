@@ -16,9 +16,9 @@ var object = require('object'),
 
 module.exports = SyncModel;
 
-function SyncModel (form, model, callback, callbackScope) {
+function SyncModel (form, model) {
   if (!(this instanceof SyncModel))
-    return new SyncModel(form, model, callback, callbackScope);
+    return new SyncModel(form, model);
 
   var self = this;
   this.form = form;
