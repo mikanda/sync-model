@@ -15,26 +15,33 @@ var object = require('object'),
  * Module exports.
  */
 
-module.exports = SyncModel;
+module.exports = function(handlers){
+  return function(Model){
+
+    // inject new method
+
+    Model.prototype.syncWith = function(el){
+      SyncModel(el, this, handlers);
+    };
+  };
+};
 
 /**
- * Boundled handlers to convert types.
+ * Create/initialize a new synchronizer instance.
  */
 
-function SyncModel (form, model, handlers) {
+function SyncModel(el, model, handlers) {
   if (!(this instanceof SyncModel))
-    return new SyncModel(form, model);
+    return new SyncModel(el, model, handlers);
 
   var self = this;
-  this.handlers = {
+  this.typeHandlers = {
     'integer': bind(this, this.toNumber),
     'number': bind(this, this.toNumber)
   };
-  object.merge(this.handlers, handlers || {});
-  this.form = form;
+  this.formatHandlers = handlers || {};
+  this.el = el;
   this.model = model;
-  if (type(model) === 'function')
-    this.model = model = new model();
 
   each(model.model.attrs, function (key, meta) {
     self.sync(key, meta);
@@ -51,8 +58,9 @@ function SyncModel (form, model, handlers) {
 
 SyncModel.prototype.sync = function (key, schema) {
 
-  // dispatch the the handling to the appropriate route
+  // dispatch the the handling to the appropriate function
 
+  if (!schema) return;
   switch (schema.type) {
     case 'object': return this.syncObject(key, schema);
     case 'array': return this.syncArray(key, schema);
@@ -71,13 +79,25 @@ SyncModel.prototype.sync = function (key, schema) {
 SyncModel.prototype.syncValue = function(key, schema){
   var el,
       val,
-      handler;
-  el = query('[name=' + JSON.stringify(key) + ']', this.form);
+      handler = null;
+  el = query('[name=' + JSON.stringify(key) + ']', this.el);
   if (!el) return;
   val = value(el);
-  if ((handler = this.handlers[schema.type])) {
-    val = handler(val);
+
+  // apply type handler if available
+
+  handler = this.typeHandlers[schema.type];
+  if (handler) val = handler(val);
+
+  // apply format handler if available
+
+  if (schema.format) {
+    handler = this.formatHandlers[schema.format];
+    if (handler) val = handler(val);
   }
+
+  // update the modified value
+
   this.updateValue(key, val);
 };
 
@@ -114,7 +134,7 @@ SyncModel.prototype.syncArray = function(key, schema){
   // set initial to empty array
 
   this.updateValue(key, []);
-  for (var i = 0; query(queryFn(i), this.form); ++i) {
+  for (var i = 0; query(queryFn(i), this.el); ++i) {
     this.sync(key + '.' + i, schema.items);
   }
 };

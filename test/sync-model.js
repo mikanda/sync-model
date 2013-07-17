@@ -29,6 +29,8 @@ describe('sync-model', function(){
       '    <form>',
       '      <input name="simplevalue" type="text"',
       '             value="simplevalue : value" />',
+      '      <input name="formattedvalue" type="text"',
+      '             value="formattedvalue : value" />',
       '      <input name="objectvalue.nested.value" type="text"',
       '             value="objectvalue -> nested -> value : value" />',
       '      <input name="arrayvalue.0.nested.value"',
@@ -45,6 +47,10 @@ describe('sync-model', function(){
 
     Model = model('Entity')
       .attr('simplevalue', { type: 'string' })
+      .attr('formattedvalue', {
+        type: 'string',
+        format: 'date'
+      })
       .attr('objectvalue', {
         type: 'object',
         properties: {
@@ -71,10 +77,19 @@ describe('sync-model', function(){
         }
       });
 
+    // initialize plugin
+
+    Model.use(syncModel({
+      date: function(value){
+        return value + ':date';
+      }
+    }));
+
     // use model to instantiate object
 
     object = new Model({
       simplevalue: 'string',
+      formattedvalue: 'string',
       objectvalue: {
         nested: {
           value: 'string'
@@ -92,10 +107,13 @@ describe('sync-model', function(){
         }
       ]
     });
-    syncModel(el, object);
+    object.syncWith(el);
   });
   it('should have synchronized the simple value', function(){
-    object.simplevalue().should.eql('simplevalue : value');
+    object.simplevalue().should.equal('simplevalue : value');
+  });
+  it('should have synchronized the formatted value', function(){
+    object.formattedvalue().should.equal('formattedvalue : value:date');
   });
   it('should have synchronized the object value', function(){
     should.exist(object.objectvalue().nested);
