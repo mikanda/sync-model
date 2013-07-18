@@ -2,7 +2,7 @@
   "name": "sync-model",
   "repo": "mikanda/sync-model",
   "description": "Takes a model and updates its values using form fields",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "keywords": [
     "sync",
     "model"
