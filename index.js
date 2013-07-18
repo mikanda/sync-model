@@ -1,4 +1,3 @@
-
 /**
  * Module dependencies.
  */
@@ -83,6 +82,7 @@ SyncModel.prototype.syncValue = function(key, schema){
   el = query('[name=' + JSON.stringify(key) + ']', this.el);
   if (!el) return;
   val = value(el);
+  if (val === '') val = undefined;
 
   // apply type handler if available
 
